@@ -1,8 +1,5 @@
 sudo: required
-language: ruby
-rvm:
- - 2.2
- - jruby
+language: bash
 
 services:
   - docker
@@ -11,7 +8,7 @@ env:
   global:
     - COMMIT=${TRAVIS_COMMIT::8}
 
-after_success:
+script:
   - docker login -u $DOCKER_USER -p $DOCKER_PASS
   - export REPO=piotrovskyi/react-native-fastlane
   - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
