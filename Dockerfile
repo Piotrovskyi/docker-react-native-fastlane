@@ -4,6 +4,7 @@ LABEL maintainer "yevhen.piotrovskyi@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
+
 ################################################################################################
 ###
 ### Environment variables
