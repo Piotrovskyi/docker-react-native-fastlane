@@ -18,7 +18,7 @@ ENV ANDROID_SDK_COMPONENTS_LATEST platform-tools,build-tools-23.0.1,build-tools-
 
 # NodeJS
 ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_VERSION 10.15.1
+ENV NODE_VERSION latest-dubnium
 
 #Ruby
 ENV RUBY_MAJOR 2.3
