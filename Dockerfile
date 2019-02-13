@@ -29,25 +29,131 @@ ENV RUBY_DOWNLOAD_SHA256 1a4fa8c2885734ba37b97ffdb4a19b8fba0e8982606db02d936e65b
 ENV RUBYGEMS_VERSION 2.6.10
 ENV BUNDLER_VERSION 1.15.3
 
+# ------------------------------------------------------
+# --- Install required tools
 
-################################################################################################
-###
-### Install Android SDK & Build Tools
-###
+RUN apt-get update -qq
 
-# Dependencies
-RUN dpkg --add-architecture i386 \
-  && apt-get update \
-  && apt-get install -yq libstdc++6:i386 zlib1g:i386 libncurses5:i386 ant maven --no-install-recommends \
-  && curl -L ${GRADLE_URL} -o /tmp/gradle-3.3-all.zip \
-  && unzip /tmp/gradle-3.3-all.zip -d /usr/local \
-  && rm /tmp/gradle-3.3-all.zip \
-  && curl -L ${ANDROID_SDK_URL} | tar xz -C /usr/local \
-  && mkdir -p  /usr/local/opt/ \
-  && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
-  && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
+# Base (non android specific) tools
+# -> should be added to bitriseio/docker-bitrise-base
 
+# Dependencies to execute Android builds
+RUN dpkg --add-architecture i386
+RUN apt-get update -qq
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-8-jdk libc6:i386 libstdc++6:i386 libgcc1:i386 libncurses5:i386 libz1:i386
+
+
+# ------------------------------------------------------
+# --- Download Android SDK tools into $ANDROID_HOME
+
+RUN cd /opt \
+    && wget -q https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip -O android-sdk-tools.zip \
+    && unzip -q android-sdk-tools.zip -d ${ANDROID_HOME} \
+    && rm android-sdk-tools.zip
+
+ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+
+# ------------------------------------------------------
+# --- Install Android SDKs and other build packages
+
+# Other tools and resources of Android SDK
+#  you should only install the packages you need!
+# To get a full list of available options you can use:
+#  sdkmanager --list
+
+# Accept licenses before installing components, no need to echo y for each component
+# License is valid for all the standard components in versions installed from this file
+# Non-standard components: MIPS system images, preview versions, GDK (Google Glass) and Android Google TV require separate licenses, not accepted there
 RUN yes | sdkmanager --licenses
+
+# Platform tools
+RUN sdkmanager "emulator" "tools" "platform-tools"
+
+# SDKs
+# Please keep these in descending order!
+# The `yes` is for accepting all non-standard tool licenses.
+
+# Please keep all sections in descending order!
+RUN yes | sdkmanager \
+    "platforms;android-28" \
+    "platforms;android-27" \
+    "platforms;android-26" \
+    "platforms;android-25" \
+    "platforms;android-24" \
+    "platforms;android-23" \
+    "platforms;android-22" \
+    "platforms;android-21" \
+    "platforms;android-19" \
+    "platforms;android-17" \
+    "platforms;android-15" \
+    "build-tools;28.0.3" \
+    "build-tools;28.0.2" \
+    "build-tools;28.0.1" \
+    "build-tools;28.0.0" \
+    "build-tools;27.0.3" \
+    "build-tools;27.0.2" \
+    "build-tools;27.0.1" \
+    "build-tools;27.0.0" \
+    "build-tools;26.0.2" \
+    "build-tools;26.0.1" \
+    "build-tools;25.0.3" \
+    "build-tools;24.0.3" \
+    "build-tools;23.0.3" \
+    "build-tools;22.0.1" \
+    "build-tools;21.1.2" \
+    "build-tools;19.1.0" \
+    "build-tools;17.0.0" \
+    "system-images;android-28;google_apis;x86" \
+    "system-images;android-26;google_apis;x86" \
+    "system-images;android-25;google_apis;armeabi-v7a" \
+    "system-images;android-24;default;armeabi-v7a" \
+    "system-images;android-22;default;armeabi-v7a" \
+    "system-images;android-19;default;armeabi-v7a" \
+    "extras;android;m2repository" \
+    "extras;google;m2repository" \
+    "extras;google;google_play_services" \
+    "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2" \
+    "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.1" \
+    "add-ons;addon-google_apis-google-23" \
+    "add-ons;addon-google_apis-google-22" \
+    "add-ons;addon-google_apis-google-21"
+
+# ------------------------------------------------------
+# --- Install Gradle from PPA
+
+# Gradle PPA
+RUN apt-get update \
+ && apt-get -y install gradle \
+ && gradle -v
+
+# ------------------------------------------------------
+# --- Install Maven 3 from PPA
+
+RUN apt-get purge maven maven2 \
+ && apt-get update \
+ && apt-get -y install maven \
+ && mvn --version
+
+
+# ------------------------------------------------------
+
+# ################################################################################################
+# ###
+# ### Install Android SDK & Build Tools
+# ###
+
+# # Dependencies
+# RUN dpkg --add-architecture i386 \
+#   && apt-get update \
+#   && apt-get install -yq libstdc++6:i386 zlib1g:i386 libncurses5:i386 ant maven --no-install-recommends \
+#   && curl -L ${GRADLE_URL} -o /tmp/gradle-3.3-all.zip \
+#   && unzip /tmp/gradle-3.3-all.zip -d /usr/local \
+#   && rm /tmp/gradle-3.3-all.zip \
+#   && curl -L ${ANDROID_SDK_URL} | tar xz -C /usr/local \
+#   && mkdir -p  /usr/local/opt/ \
+#   && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
+#   && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
+
 
 ################################################################################################
 ###
