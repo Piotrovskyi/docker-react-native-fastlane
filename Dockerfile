@@ -1,4 +1,4 @@
-FROM java:jdk
+FROM gradle:4.10.0-jdk8
 
 LABEL maintainer "yevhen.piotrovskyi@gmail.com"
 
@@ -29,25 +29,46 @@ ENV RUBY_DOWNLOAD_SHA256 1a4fa8c2885734ba37b97ffdb4a19b8fba0e8982606db02d936e65b
 ENV RUBYGEMS_VERSION 2.6.10
 ENV BUNDLER_VERSION 1.15.3
 
+USER root
+ENV SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
+    ANDROID_HOME="/usr/local/android-sdk" \
+    ANDROID_VERSION=28 \
+    ANDROID_BUILD_TOOLS_VERSION=27.0.3
+# Download Android SDK
+RUN mkdir "$ANDROID_HOME" .android \
+    && cd "$ANDROID_HOME" \
+    && curl -o sdk.zip $SDK_URL \
+    && unzip sdk.zip \
+    && rm sdk.zip \
+    && mkdir "$ANDROID_HOME/licenses" || true \
+    && echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$ANDROID_HOME/licenses/android-sdk-license" \
+    && yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+# Install Android Build Tool and Libraries
+RUN $ANDROID_HOME/tools/bin/sdkmanager --update
+RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
+    "platforms;android-${ANDROID_VERSION}" \
+    "platform-tools"
+# Install Build Essentials
+RUN apt-get update && apt-get install build-essential -y && apt-get install file -y && apt-get install apt-utils -y
 
-################################################################################################
-###
-### Install Android SDK & Build Tools
-###
+# ################################################################################################
+# ###
+# ### Install Android SDK & Build Tools
+# ###
 
-# Dependencies
-RUN dpkg --add-architecture i386 \
-  && apt-get update \
-  && apt-get install -yq libstdc++6:i386 zlib1g:i386 libncurses5:i386 ant maven --no-install-recommends \
-  && curl -L ${GRADLE_URL} -o /tmp/gradle-3.3-all.zip \
-  && unzip /tmp/gradle-3.3-all.zip -d /usr/local \
-  && rm /tmp/gradle-3.3-all.zip \
-  && curl -L ${ANDROID_SDK_URL} | tar xz -C /usr/local \
-  && mkdir -p  /usr/local/opt/ \
-  && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
-  && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
+# # Dependencies
+# RUN dpkg --add-architecture i386 \
+#   && apt-get update \
+#   && apt-get install -yq libstdc++6:i386 zlib1g:i386 libncurses5:i386 ant maven --no-install-recommends \
+#   && curl -L ${GRADLE_URL} -o /tmp/gradle-3.3-all.zip \
+#   && unzip /tmp/gradle-3.3-all.zip -d /usr/local \
+#   && rm /tmp/gradle-3.3-all.zip \
+#   && curl -L ${ANDROID_SDK_URL} | tar xz -C /usr/local \
+#   && mkdir -p  /usr/local/opt/ \
+#   && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
+#   && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
 
-RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses
+# RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses
 
 ################################################################################################
 ###
