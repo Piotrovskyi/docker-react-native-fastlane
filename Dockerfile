@@ -46,6 +46,7 @@ RUN dpkg --add-architecture i386 \
   && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
   && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
 
+RUN yes | sdkmanager --licenses
 
 ################################################################################################
 ###
