@@ -167,4 +167,4 @@ RUN gem install fastlane -NV \
 RUN apt-get purge -y --auto-remove $buildDeps
 
 # Output versions
-RUN node -v && npm -v && ruby -v && bundler -v && fastlane -v && java --version
+RUN node -v && npm -v && ruby -v && bundler -v && fastlane -v
