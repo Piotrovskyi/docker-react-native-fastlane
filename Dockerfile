@@ -49,7 +49,7 @@ RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSIO
     "platforms;android-${ANDROID_VERSION}" \
     "platform-tools" > /dev/null
 # Install Build Essentials
-RUN apt-get update && apt-get install build-essential -y && apt-get install file -y && apt-get install apt-utils -y
+RUN apt-get update && apt-get install build-essential -y && apt-get install file -y && apt-get install apt-utils -y && apt-get install openssl -y
 
 # ################################################################################################
 # ###
