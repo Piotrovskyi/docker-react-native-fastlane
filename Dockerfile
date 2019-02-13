@@ -18,7 +18,8 @@ ENV ANDROID_SDK_COMPONENTS_LATEST platform-tools,build-tools-23.0.1,build-tools-
 
 # NodeJS
 ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_VERSION latest-dubnium
+ENV NODE_VERSION_NAME latest-dubnium
+ENV NODE_VERSION 10.15.1
 
 #Ruby
 ENV RUBY_MAJOR 2.3
@@ -69,8 +70,8 @@ RUN set -ex \
   done
 
 
-RUN curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.xz" \
-  && curl -SLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt.asc" \
+RUN curl -SLO "https://nodejs.org/dist/$NODE_VERSION_NAME/node-v$NODE_VERSION-linux-x64.tar.xz" \
+  && curl -SLO "https://nodejs.org/dist/$NODE_VERSION_NAME/SHASUMS256.txt.asc" \
   && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
   && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
   && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
