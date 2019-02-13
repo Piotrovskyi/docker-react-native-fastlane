@@ -111,57 +111,68 @@ RUN apt-get update && \
 ### Install Ruby & bundler
 ###
 
-# skip installing gem documentation
-RUN mkdir -p /usr/local/etc \
-  && { \
-    echo 'install: --no-document'; \
-    echo 'update: --no-document'; \
-  } >> /usr/local/etc/gemrc
+# # skip installing gem documentation
+# RUN mkdir -p /usr/local/etc \
+#   && { \
+#     echo 'install: --no-document'; \
+#     echo 'update: --no-document'; \
+#   } >> /usr/local/etc/gemrc
 
-# some of ruby's build scripts are written in ruby
-#   we purge system ruby later to make sure our final image uses what we just built
-RUN set -ex \
-  \
-  && buildDeps=' \
-    bison \
-    libgdbm-dev \
-    ruby \
-    autoconf bison build-essential libssl-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev \
-  ' \
-  && apt-get install -y libtool libyaml-dev imagemagick \
-  && apt-get install -y --no-install-recommends $buildDeps \
-  && rm -rf /var/lib/apt/lists/* \
-  \
-  && wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
-  && echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
-  \
-  && mkdir -p /usr/src/ruby \
-  && tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
-  && rm ruby.tar.xz \
-  \
-  && cd /usr/src/ruby \
-  \
-# hack in "ENABLE_PATH_CHECK" disabling to suppress:
-#   warning: Insecure world writable dir
-  && { \
-    echo '#define ENABLE_PATH_CHECK 0'; \
-    echo; \
-    cat file.c; \
-  } > file.c.new \
-  && mv file.c.new file.c \
-  \
-  && autoconf \
-  && ./configure --disable-install-doc --enable-shared \
-  && make -j"$(nproc)" \
-  && make install \
-  \
-  && cd / \
-  && rm -r /usr/src/ruby \
-  \
-  && gem update --system "$RUBYGEMS_VERSION"
+# # some of ruby's build scripts are written in ruby
+# #   we purge system ruby later to make sure our final image uses what we just built
+# RUN set -ex \
+#   \
+#   && buildDeps=' \
+#     bison \
+#     libgdbm-dev \
+#     ruby \
+#     autoconf bison build-essential libssl-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev \
+#   ' \
+#   && apt-get install -y libtool libyaml-dev imagemagick \
+#   && apt-get install -y --no-install-recommends $buildDeps \
+#   && rm -rf /var/lib/apt/lists/* \
+#   \
+#   && wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
+#   && echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
+#   \
+#   && mkdir -p /usr/src/ruby \
+#   && tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
+#   && rm ruby.tar.xz \
+#   \
+#   && cd /usr/src/ruby \
+#   \
+# # hack in "ENABLE_PATH_CHECK" disabling to suppress:
+# #   warning: Insecure world writable dir
+#   && { \
+#     echo '#define ENABLE_PATH_CHECK 0'; \
+#     echo; \
+#     cat file.c; \
+#   } > file.c.new \
+#   && mv file.c.new file.c \
+#   \
+#   && autoconf \
+#   && ./configure --disable-install-doc --enable-shared \
+#   && make -j"$(nproc)" \
+#   && make install \
+#   \
+#   && cd / \
+#   && rm -r /usr/src/ruby \
+#   \
+#   && gem update --system "$RUBYGEMS_VERSION"
 
 
-RUN gem install bundler --version "$BUNDLER_VERSION"
+# RUN gem install bundler --version "$BUNDLER_VERSION"
+
+# RUN apt-get update
+# install the prerequisite patches here so that rvm will install under non-root account.
+RUN apt-get update && apt-get install -y curl patch gawk g++ gcc make libc6-dev patch libreadline6-dev zlib1g-dev libssl-dev libyaml-dev libsqlite3-dev sqlite3 autoconf libgdbm-dev libncurses5-dev automake libtool bison pkg-config libffi-dev
+RUN useradd -ms /bin/bash app
+USER app
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys D39DC0E3
+RUN /bin/bash -l -c "curl -L get.rvm.io | bash -s stable --rails"
+RUN /bin/bash -l -c "rvm install 2.1"
+RUN /bin/bash -l -c "echo 'gem: --no-ri --no-rdoc' > ~/.gemrc"
+RUN /bin/bash -l -c "gem install bundler --no-ri --no-rdoc"
 
 # install things globally, for great justice
 # and don't create ".bundle" in all our apps
