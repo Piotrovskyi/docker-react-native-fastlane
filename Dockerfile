@@ -160,7 +160,7 @@ RUN set -ex \
   && gem update --system "$RUBYGEMS_VERSION"
 
 
-RUN gem install bundler
+# RUN gem install bundler --version "$BUNDLER_VERSION"
 
 # install things globally, for great justice
 # and don't create ".bundle" in all our apps
