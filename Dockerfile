@@ -33,6 +33,7 @@ ENV SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zi
     ANDROID_HOME="/usr/local/android-sdk" \
     ANDROID_VERSION=28 \
     ANDROID_BUILD_TOOLS_VERSION=27.0.3
+
 # Download Android SDK
 RUN mkdir "$ANDROID_HOME" .android \
     && cd "$ANDROID_HOME" \
@@ -42,63 +43,21 @@ RUN mkdir "$ANDROID_HOME" .android \
     && mkdir "$ANDROID_HOME/licenses" || true \
     && echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$ANDROID_HOME/licenses/android-sdk-license" \
     && yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses
+
 # Install Android Build Tool and Libraries
 RUN $ANDROID_HOME/tools/bin/sdkmanager --update > /dev/null
 RUN $ANDROID_HOME/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" \
     "platforms;android-${ANDROID_VERSION}" \
     "platform-tools"  > /dev/null
+
+
+RUN echo "deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main" > /etc/apt/sources.list.d/jessie-backports.list
+RUN sed -i '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' /etc/apt/sources.list
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+
+
 # Install Build Essentials
 RUN apt-get update && apt-get install build-essential -y && apt-get install file -y && apt-get install apt-utils -y
-
-# ################################################################################################
-# ###
-# ### Install Android SDK & Build Tools
-# ###
-
-# # Dependencies
-# RUN dpkg --add-architecture i386 \
-#   && apt-get update \
-#   && apt-get install -yq libstdc++6:i386 zlib1g:i386 libncurses5:i386 ant maven --no-install-recommends \
-#   && curl -L ${GRADLE_URL} -o /tmp/gradle-3.3-all.zip \
-#   && unzip /tmp/gradle-3.3-all.zip -d /usr/local \
-#   && rm /tmp/gradle-3.3-all.zip \
-#   && curl -L ${ANDROID_SDK_URL} | tar xz -C /usr/local \
-#   && mkdir -p  /usr/local/opt/ \
-#   && ln -s /usr/local/android-sdk-linux /usr/local/opt/android-sdk \
-#   && (while sleep 3; do echo "y"; done) | ${ANDROID_HOME}/tools/android update sdk --no-ui --all --filter "${ANDROID_SDK_COMPONENTS_LATEST}"
-
-# RUN yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses
-
-################################################################################################
-###
-### Install NodeJS & NPM
-###
-
-# RUN groupadd --gid 1000 node \
-#   && useradd --uid 1000 --gid node --shell /bin/bash --create-home node
-
-# RUN set -ex \
-#   && for key in \
-#     9554F04D7259F04124DE6B476D5A82AC7E37093B \
-#     94AE36675C464D64BAFA68DD7434390BDBE9B9C5 \
-#     0034A06D9D9B0064CE8ADF6BF1747F4AD2306D93 \
-#     FD3A5288F042B6850C66B31F09FE44734EB7990E \
-#     71DCFD284A79C3B38668286BC97EC7A07EDE3FC1 \
-#     DD8F2338BAE7501E3DD5AC78C273792F7D83545D \
-#     B9AE9905FFD7803F25714661B63B535A4C206CA9 \
-#     C4F0DFFF4E8C1A8236409D08E73BC641CC11F4C8 \
-#   ; do \
-#     gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$key"; \
-#   done
-
-
-# RUN curl -SLO "https://nodejs.org/dist/$NODE_VERSION_NAME/node-v$NODE_VERSION-linux-x64.tar.xz" \
-#   && curl -SLO "https://nodejs.org/dist/$NODE_VERSION_NAME/SHASUMS256.txt.asc" \
-#   && gpg --batch --decrypt --output SHASUMS256.txt SHASUMS256.txt.asc \
-#   && grep " node-v$NODE_VERSION-linux-x64.tar.xz\$" SHASUMS256.txt | sha256sum -c - \
-#   && tar -xJf "node-v$NODE_VERSION-linux-x64.tar.xz" -C /usr/local --strip-components=1 \
-#   && rm "node-v$NODE_VERSION-linux-x64.tar.xz" SHASUMS256.txt.asc SHASUMS256.txt \
-#   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 RUN apt-get update && \
     apt-get -y install zip expect && \
