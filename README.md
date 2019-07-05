@@ -15,6 +15,7 @@ OpenJDK 64-Bit Server VM (build 25.111-b14, mixed mode)
 |ruby|2.3.3|
 |gems|2.6.10|
 |bundler|1.14.3|
+|fastlane|2.126.0|
 
 # Usage
 
