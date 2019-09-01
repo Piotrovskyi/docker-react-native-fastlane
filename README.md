@@ -1,21 +1,21 @@
+### Status
+[![Build Status](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane.png)](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane)
+
 # Components
 ```
-openjdk version "1.8.0_111"
-OpenJDK Runtime Environment (build 1.8.0_111-8u111-b14-2~bpo8+1-b14)
-OpenJDK 64-Bit Server VM (build 25.111-b14, mixed mode)
+Built on openjdk version 8
 ```
 
 | Component Name | Version |
 |:---------------|--------:|
 |gradle|3.3|
-|android-sdk|24.0.2|
-|build-tools|23.0.1|
-|nodejs|dubnium|
-|npm|6.4.1|
-|ruby|2.3.3|
-|gems|2.6.10|
-|bundler|1.14.3|
-|fastlane|2.126.0|
+|android-sdk|24.3.3|
+|build-tools|27.0.3|
+|nodejs|10.x|
+|ruby|2.5.1|
+|gems|3.0.6|
+|bundler|1.15.3|
+|fastlane|2.129.0|
 
 # Usage
 

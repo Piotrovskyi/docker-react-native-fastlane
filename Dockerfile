@@ -1,38 +1,35 @@
-FROM java:jdk
+FROM openjdk:8
 
 LABEL maintainer "yevhen.piotrovskyi@gmail.com"
 
 ENV DEBIAN_FRONTEND noninteractive
 
-
-################################################################################################
-###
-### Environment variables
-###
 # Android & Gradle
-ENV GRADLE_URL http://services.gradle.org/distributions/gradle-3.3-all.zip
-ENV GRADLE_HOME /usr/local/gradle-3.3
-ENV ANDROID_SDK_URL http://dl.google.com/android/android-sdk_r24.3.3-linux.tgz
-ENV ANDROID_HOME /usr/local/android-sdk-linux
-ENV ANDROID_SDK_COMPONENTS_LATEST platform-tools,build-tools-23.0.1,build-tools-25.0.3,android-23,android-25,extra-android-support,extra-android-m2repository,extra-google-m2repository
-ENV PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
-
-# NodeJS
-ENV NPM_CONFIG_LOGLEVEL info
-ENV NODE_VERSION_NAME latest-dubnium
-ENV NODE_VERSION 10.x
-
-#Ruby
-ENV RUBY_MAJOR 2.3
-ENV RUBY_VERSION 2.3.8
-ENV RUBY_DOWNLOAD_SHA256 910f635d84fd0d81ac9bdee0731279e6026cb4cd1315bbbb5dfb22e09c5c1dfe
-ENV RUBYGEMS_VERSION 3.0.1
-ENV BUNDLER_VERSION 1.15.3
-
-ENV SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
+ENV GRADLE_URL http://services.gradle.org/distributions/gradle-3.3-all.zip \
+    GRADLE_HOME /usr/local/gradle-3.3 \
+    ANDROID_SDK_URL http://dl.google.com/android/android-sdk_r24.3.3-linux.tgz \
+    ANDROID_HOME /usr/local/android-sdk-linux \
+    ANDROID_SDK_COMPONENTS_LATEST platform-tools,build-tools-23.0.1,build-tools-25.0.3,android-23,android-25,extra-android-support,extra-android-m2repository,extra-google-m2repository \
+    PATH ${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools \
+    SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
     ANDROID_HOME="/usr/local/android-sdk" \
     ANDROID_VERSION=28 \
     ANDROID_BUILD_TOOLS_VERSION=27.0.3
+
+# NodeJS
+ENV NPM_CONFIG_LOGLEVEL info \
+    NODE_VERSION 10.x
+
+#Ruby
+ENV RUBY_MAJOR 2.5 \
+    RUBY_VERSION 2.5.1 \
+    RUBY_DOWNLOAD_SHA256 886ac5eed41e3b5fc699be837b0087a6a5a3d10f464087560d2d21b3e71b754d \
+    RUBYGEMS_VERSION 3.0.6 \
+    BUNDLER_VERSION 1.15.3
+
+#Fastlane
+ENV FASTLANE_VERSION 2.129.0
+
 
 # Download Android SDK
 RUN mkdir "$ANDROID_HOME" .android \
@@ -58,11 +55,6 @@ RUN apt-get update && \
     curl -sL https://deb.nodesource.com/setup_${NODE_VERSION} | bash - && \
     apt-get install -y nodejs
 
-################################################################################################
-###
-### Install Ruby & bundler
-###
-
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
   && { \
@@ -70,8 +62,6 @@ RUN mkdir -p /usr/local/etc \
     echo 'update: --no-document'; \
   } >> /usr/local/etc/gemrc
 
-# some of ruby's build scripts are written in ruby
-#   we purge system ruby later to make sure our final image uses what we just built
 RUN set -ex \
   \
   && buildDeps=' \
@@ -86,15 +76,12 @@ RUN set -ex \
   \
   && wget -O ruby.tar.xz "https://cache.ruby-lang.org/pub/ruby/${RUBY_MAJOR%-rc}/ruby-$RUBY_VERSION.tar.xz" \
   && echo "$RUBY_DOWNLOAD_SHA256 *ruby.tar.xz" | sha256sum -c - \
-  \
   && mkdir -p /usr/src/ruby \
   && tar -xJf ruby.tar.xz -C /usr/src/ruby --strip-components=1 \
   && rm ruby.tar.xz \
-  \
   && cd /usr/src/ruby \
-  \
-# hack in "ENABLE_PATH_CHECK" disabling to suppress:
-#   warning: Insecure world writable dir
+  # hack in "ENABLE_PATH_CHECK" disabling to suppress:
+  #   warning: Insecure world writable dir
   && { \
     echo '#define ENABLE_PATH_CHECK 0'; \
     echo; \
@@ -112,9 +99,6 @@ RUN set -ex \
   \
   && gem update --system "$RUBYGEMS_VERSION"
 
-
-# RUN gem install bundler --version "$BUNDLER_VERSION"
-
 # install things globally, for great justice
 # and don't create ".bundle" in all our apps
 ENV GEM_HOME /usr/local/bundle
@@ -128,13 +112,7 @@ RUN mkdir -p "$GEM_HOME" "$BUNDLE_BIN" \
 # Path
 ENV PATH $PATH:$BUNDLE_BIN:${ANDROID_HOME}/tools:$ANDROID_HOME/platform-tools:${GRADLE_HOME}/bin
 
-
-################################################################################################
-###
-### Install Fastlane and plugins
-###
-
-RUN gem install fastlane -NV \
+RUN gem install fastlane -v $FASTLANE_VERSION \
   && gem install fastlane-plugin-appicon fastlane-plugin-android_change_string_app_name fastlane-plugin-humanable_build_number \
   && gem update --system "$RUBYGEMS_VERSION"
 
@@ -142,4 +120,4 @@ RUN gem install fastlane -NV \
 RUN apt-get purge -y --auto-remove $buildDeps
 
 # Output versions
-RUN node -v && npm -v && ruby -v && fastlane -v
+RUN java -version && node -v && npm -v && ruby -v && fastlane -v
