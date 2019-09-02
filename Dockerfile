@@ -29,7 +29,7 @@ ENV SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zi
     ANDROID_VERSION=28 \
     ANDROID_BUILD_TOOLS_VERSION=27.0.3
 
-ENV FASTLANE_VERSION 2.129.0
+ENV FASTLANE_VERSION 2.130.0
 
 # Download Android SDK
 RUN mkdir "$ANDROID_HOME" .android \
