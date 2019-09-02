@@ -15,7 +15,7 @@ script:
   - docker build -t $REPO:$COMMIT .
 
 after_success:
+  - docker tag $REPO:$COMMIT $REPO:1.$TRAVIS_BUILD_NUMBER.0
   - docker tag $REPO:$COMMIT $REPO:$TAG
-  - docker tag $REPO:$COMMIT $REPO:travis-$TRAVIS_BUILD_NUMBER
+  - docker push $REPO:1.$TRAVIS_BUILD_NUMBER.0
   - docker push $REPO:$TAG
-  - docker push $REPO:travis-$TRAVIS_BUILD_NUMBER
