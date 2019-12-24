@@ -1,11 +1,12 @@
+# Docker React Native Fastlane
 Image for build React native android apps using Fastlane inside the docker container with no efforts
 
 https://hub.docker.com/r/piotrovskyi/react-native-fastlane
 
-### Status
+## Status
 [![Build Status](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane.png)](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane)
 
-# Components
+## Components
 ```
 Built on openjdk version 8
 ```
@@ -21,7 +22,7 @@ Built on openjdk version 8
 |bundler|1.15.3|
 |fastlane|2.129.0|
 
-# Usage
+## Usage
 
 Release Build
 ```
