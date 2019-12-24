@@ -1,3 +1,8 @@
+# Motivation [![Build Status](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane.png)](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane)
+Image for build React native android apps using Fastlane inside the docker container with no efforts
+
+https://hub.docker.com/r/piotrovskyi/react-native-fastlane
+
 ### Status
 [![Build Status](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane.png)](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane)
 
