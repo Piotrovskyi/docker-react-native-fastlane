@@ -18,18 +18,17 @@ ENV NODE_VERSION_NAME latest-dubnium
 ENV NODE_VERSION 10.x
 
 #Ruby
-ENV RUBY_MAJOR 2.5
-ENV RUBY_VERSION 2.5.1
-ENV RUBY_DOWNLOAD_SHA256 886ac5eed41e3b5fc699be837b0087a6a5a3d10f464087560d2d21b3e71b754d
-ENV RUBYGEMS_VERSION 3.0.6
-ENV BUNDLER_VERSION 1.15.3
+# https://www.ruby-lang.org/en/news/2020/03/31/ruby-2-7-1-released/
+ENV RUBY_MAJOR 2.7
+ENV RUBY_VERSION 2.7.1
+ENV RUBY_DOWNLOAD_SHA256 b224f9844646cc92765df8288a46838511c1cec5b550d8874bd4686a904fcee7
 
 ENV SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-3859397.zip" \
     ANDROID_HOME="/usr/local/android-sdk" \
     ANDROID_VERSION=28 \
     ANDROID_BUILD_TOOLS_VERSION=27.0.3
 
-ENV FASTLANE_VERSION 2.130.0
+ENV FASTLANE_VERSION 2.146.1
 
 # Download Android SDK
 RUN mkdir "$ANDROID_HOME" .android \
@@ -68,7 +67,7 @@ RUN set -ex \
     bison \
     libgdbm-dev \
     ruby \
-    autoconf bison build-essential libssl-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm3 libgdbm-dev \
+    autoconf bison build-essential libssl-dev libreadline6-dev zlib1g-dev libncurses5-dev libffi-dev libgdbm6 libgdbm-dev \
   ' \
   && apt-get install -y libtool libyaml-dev imagemagick \
   && apt-get install -y --no-install-recommends $buildDeps \
@@ -96,7 +95,7 @@ RUN set -ex \
   && cd / \
   && rm -r /usr/src/ruby \
   \
-  && gem update --system "$RUBYGEMS_VERSION"
+  && gem update --system
 
 # install things globally, for great justice
 # and don't create ".bundle" in all our apps
@@ -113,7 +112,7 @@ ENV PATH $PATH:$BUNDLE_BIN:${ANDROID_HOME}/tools:$ANDROID_HOME/platform-tools:${
 
 RUN gem install fastlane -v ${FASTLANE_VERSION} \
   && gem install fastlane-plugin-appicon fastlane-plugin-android_change_string_app_name fastlane-plugin-humanable_build_number \
-  && gem update --system "$RUBYGEMS_VERSION"
+  && gem update --system
 
 # Remove Build Deps
 RUN apt-get purge -y --auto-remove $buildDeps
