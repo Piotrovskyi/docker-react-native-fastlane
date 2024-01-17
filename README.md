@@ -4,7 +4,8 @@ Image for build React native android apps using Fastlane inside the docker conta
 https://hub.docker.com/r/piotrovskyi/react-native-fastlane
 
 ## Status
-[![Build Status](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane.png)](https://travis-ci.org/Piotrovskyi/docker-react-native-fastlane)
+[![Pulls statistics](https://img.shields.io/endpoint?url=https://docker-pulls-status.yojji.workers.dev/?repo=piotrovskyi/react-native-fastlane&color=green)
+
 
 ## Components
 ```
